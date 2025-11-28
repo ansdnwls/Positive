@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주간 확언 생성</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      color: #555;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    select, button, input {
+      font-size: 16px;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select {
+      width: 100%;
+      background-color: #f5f5f5;
+      color: #333;
+      border: 2px solid #ddd;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: #fff;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-generate {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-print {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      display: none;
+      flex: 1;
+    }
+
+    .btn-print.show {
+      display: block;
+    }
+
+    .btn-print:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .result-section {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .result-section.show {
+      display: block;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .edit-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .edit-section h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .affirmation-line {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .affirmation-line input {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .affirmation-line input:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: #fff;
+    }
+
+    .btn-delete {
+      background-color: #ff6b6b;
+      color: white;
+      padding: 10px 15px;
+      font-size: 14px;
+      min-width: auto;
+      width: auto;
+    }
+
+    .btn-delete:hover {
+      background-color: #ff5252;
+      transform: translateY(-2px);
+    }
+
+    .btn-change {
+      background-color: #4ECDC4;
+      color: white;
+      padding: 10px 15px;
+      font-size: 14px;
+      min-width: auto;
+      width: auto;
+    }
+
+    .btn-change:hover {
+      background-color: #45b8b0;
+      transform: translateY(-2px);
+    }
+
+    .affirmation-card {
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      page-break-inside: avoid;
+      background: white !important;
+      color: black !important;
+    }
+
+    .affirmation-theme {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      opacity: 0.8;
+      color: black;
+      display: none;
+    }
+
+    .affirmation-age {
+      font-size: 14px;
+      margin-bottom: 15px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    .affirmation-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: black;
+    }
+
+    .affirmation-text {
+      font-size: 22px;
+      line-height: 2;
+      color: black;
+      font-weight: 500;
+    }
+
+    .affirmation-text div {
+      margin: 8px 0;
+    }
+
+    .add-line-btn {
+      background-color: #4ECDC4;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    .add-line-btn:hover {
+      background-color: #45b8b0;
+      transform: translateY(-2px);
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .form-group,
+      .button-group,
+      .edit-section {
+        display: none;
+      }
+
+      .affirmation-card {
+        page-break-inside: avoid;
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✨ 주간 확언 생성 ✨</h1>
+
+    <div class="form-group">
+      <label for="childName">아이 이름</label>
+      <input type="text" id="childName" placeholder="예: 준호, 서윤" style="width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+    </div>
+
+    <div class="form-group">
+      <label for="ageGroup">아이 나이대</label>
+      <select id="ageGroup">
+        <option value="">선택하세요</option>
+        <option value="5-7">5-7세</option>
+        <option value="8-10">8-10세</option>
+        <option value="11-13">11-13세</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="theme">확언 테마</label>
+      <select id="theme">
+        <option value="">선택하세요</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-generate" onclick="generateAffirmation()">주간 확언 생성</button>
+      <button class="btn-print" onclick="window.print()">📄 출력하기</button>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="edit-section" id="editSection"></div>
+      <div id="affirmationDisplay"></div>
+    </div>
+  </div>
+
+  <script>
+    const themesData = {
+      "themes": [
+        {
+          "id": 1,
+          "name": "자신감 & 새로운 시작",
+          "color": "#FF6B6B",
+          "ageGroups": {
+            "5-7": {
+              "week1": [
+                "나는 할 수 있어",
+                "내가 하는 일은 멋있어",
+                "오늘은 좋은 날이 될 거야",
+                "나는 충분해",
+                "힘내, 나!"
+              ]
+            },
+            "8-10": {
+              "week1": [
+                "나는 충분히 잘할 수 있어",
+                "내 능력을 믿자",
+                "새로운 도전도 할 수 있어",
+                "나는 가치 있는 사람이야",
+                "나는 나의 능력을 신뢰해"
+              ]
+            },
+            "11-13": {
+              "week1": [
+                "나는 내 능력을 믿는다",
+                "두려움에도 불구하고 도전한다",
+                "나는 충분히 훌륭하다",
+                "내 가치는 누구도 정할 수 없다",
+                "나는 내 꿈을 이룰 수 있다"
+              ]
+            }
+          }
+        },
+        {
+          "id": 2,
+          "name": "감정 조절 & 안정감",
+          "color": "#4ECDC4",
+          "ageGroups": {
+            "5-7": {"week1": ["지금의 기분은 사라질 거야","나는 차분해질 수 있어","깊게 숨을 쉬면 괜찮아진다","나는 안전해","내 마음은 소중해"]},
+            "8-10": {"week1": ["내 감정은 중요하고 정상이야","감정이 올 때, 나는 그걸 지나가게 할 수 있어","나는 내 감정을 조절할 수 있어","깊게 숨을 쉬면 차분해진다","내 마음을 돌보는 건 중요해"]},
+            "11-13": {"week1": ["내 감정은 나의 일부이지만 전부는 아니다","어려운 감정도 지나간다","나는 내 감정과 거리를 둘 수 있다","감정을 느끼는 것은 약함이 아니다","나는 내 감정을 이해하고 돌본다"]}
+          }
+        },
+        {
+          "id": 3,
+          "name": "긍정적 자기 대화",
+          "color": "#FFE66D",
+          "ageGroups": {
+            "5-7": {"week1": ["나 자신에게 친절하자","나는 좋은 친구야","내 목소리는 따뜻해","나는 나 자신을 좋아해","오늘도 잘하고 있어"]},
+            "8-10": {"week1": ["내가 자신을 대하는 방식이 중요해","실수해도 나는 여전히 괜찮아","나는 나 자신의 가장 좋은 응원자야","부정적인 생각도 지나갈 거야","나 자신에게 따뜻한 말을 해주자"]},
+            "11-13": {"week1": ["나의 내면의 목소리는 내가 만든다","나 자신에게 동정심을 가져야 한다","실패도 성장의 한 부분이다","부정적 생각에서 벗어날 수 있다","나는 나 자신에게 좋은 친구가 되어주자"]}
+          }
+        },
+        {
+          "id": 4,
+          "name": "성장과 배움",
+          "color": "#95E1D3",
+          "ageGroups": {
+            "5-7": {"week1": ["실패는 배움이야","어려운 것도 노력하면 돼","내 능력은 계속 자라고 있어","모르는 건 배우면 되지","오늘은 어제보다 더 똑똑해"]},
+            "8-10": {"week1": ["실수는 배움의 기회야","어렵다는 건 내 뇌가 자라는 신호야","계속 노력하면 할 수 있게 돼","모르는 것도 배우면 알게 될 거야","내 능력은 노력에 따라 자라"]},
+            "11-13": {"week1": ["실패 없이 성장도 없다","어려움은 나를 더 강하게 만든다","계속 배우고 성장하는 나를 사랑한다","실수로부터 배우는 게 더 중요하다","나의 노력이 내 미래를 만든다"]}
+          }
+        },
+        {
+          "id": 5,
+          "name": "자존감 & 자기 수용",
+          "color": "#F38181",
+          "ageGroups": {
+            "5-7": {"week1": ["있는 그대로의 나는 충분해","나는 특별한 존재야","나는 사랑받을 자격이 있어","나는 이대로 멋있어","나는 나 자신을 사랑해"]},
+            "8-10": {"week1": ["나는 있는 그대로 소중해","내 다름은 나를 특별하게 만들어","나는 누군가의 눈에 맞울 필요 없어","나 자신에게 감사하자","내 가치는 나만 정할 수 있어"]},
+            "11-13": {"week1": ["나는 있는 그대로 충분하다","내 개성과 차이가 나를 돋보이게 한다","다른 사람의 평가에 나의 가치가 결정되지 않는다","나 자신을 사랑하고 받아들인다","내 가치는 절대적이고 변하지 않는다"]}
+          }
+        },
+        {
+          "id": 6,
+          "name": "친절함 & 공감",
+          "color": "#AA96DA",
+          "ageGroups": {
+            "5-7": {"week1": ["친구들이 소중해","나는 친구들을 도와줄 수 있어","누군가의 친구가 되어주는 건 멋있어","다른 친구들의 기분도 중요해","우리 함께하면 더 좋아"]},
+            "8-10": {"week1": ["다른 사람의 마음을 이해하는 건 중요해","나의 친절함은 누군가에게 힘이 돼","친구를 돕는 것도 나를 성장시켜","공감하는 사람이 되고 싶어","우리는 서로 도우며 함께 자라"]},
+            "11-13": {"week1": ["타인의 입장에서 생각하려고 노력한다","내 친절이 누군가에게 도움이 된다","공감 능력은 내 최고의 강점이다","남을 돕는 것이 나를 더 인간답게 만든다","우리는 서로를 통해 더 좋은 사람이 된다"]}
+          }
+        },
+        {
+          "id": 7,
+          "name": "두려움 극복",
+          "color": "#FCBAD3",
+          "ageGroups": {
+            "5-7": {"week1": ["용감한 마음을 내보자","새로운 것도 시도해볼 수 있어","무섯지만 할 수 있어","나는 더 강해질 수 있어","오늘은 어제보다 더 용감해"]},
+            "8-10": {"week1": ["두려움은 나를 막을 수 없어","무서워도 할 수 있다는 용기를 내자","새로운 도전도 해볼 수 있어","두려움은 자연스러운 감정이야","나는 두려움을 마주할 수 있어"]},
+            "11-13": {"week1": ["용기는 두려움이 없는 게 아니라 두려움에도 나아가는 것이다","내 두려움을 인정하고 도전한다","새로운 것을 시도할 용기가 있다","두려움도 나를 성장시키는 기회다","나는 내 두려움보다 더 강하다"]}
+          }
+        },
+        {
+          "id": 8,
+          "name": "끈기 & 회복력",
+          "color": "#A8D8EA",
+          "ageGroups": {
+            "5-7": {"week1": ["힘들어도 나는 계속 간다","포기하지 않으면 돼","잠깐 쉬어도 괜찮아","나는 이겨낼 수 있어","내일은 더 나아질 거야"]},
+            "8-10": {"week1": ["어려워도 계속 나아간다","한번의 실패가 끝이 아니야","내가 견디기보다 더 강할 수는 없을까","쉬는 것도 힘내는 방법이야","다시 시작할 수 있는 힘이 있어"]},
+            "11-13": {"week1": ["어려움은 일시적이고 나는 견디어낼 수 있다","넘어져도 다시 일어날 수 있다","내 회복력을 믿는다","힘들수록 더 강해지는 나다","이 시간도 지나갈 것이고 더 나아질 거다"]}
+          }
+        },
+        {
+          "id": 9,
+          "name": "학교 적응 & 준비",
+          "color": "#FFFFD2",
+          "ageGroups": {
+            "5-7": {"week1": ["학교에 가는 건 좋아","새로운 친구들을 만날 거야","선생님은 나를 도와줄 거야","나는 학교에서도 잘할 수 있어","오늘도 신나는 하루가 될 거야"]},
+            "8-10": {"week1": ["학교는 배우고 자라는 곳이야","새로운 친구들과 잘 지을 거야","선생님과 함께라면 모든 게 괜찮아","나는 학교에서 좋은 학생이야","오늘도 즐거운 하루가 될 거야"]},
+            "11-13": {"week1": ["학교는 내가 성장하는 공간이다","새로운 친구 관계도 좋은 경험이 될 거다","선생님과 나는 함께 배운다","나는 학교에서도 능력 있는 사람이다","오늘 하루도 의미 있는 배움이 될 것이다"]}
+          }
+        },
+        {
+          "id": 10,
+          "name": "또래 관계 & 우정",
+          "color": "#DDA0DD",
+          "ageGroups": {
+            "5-7": {"week1": ["나는 좋은 친구야","함께하면 더 행복해","친구들도 나를 좋아해","우리는 서로 도와줄 수 있어","친구는 내 보물이야"]},
+            "8-10": {"week1": ["나는 신뢰할 수 있는 친구야","친구들과 함께 있으면 더 좋아","좋은 친구들이 내 곁에 있어","우정은 소중한 거야","나는 친구들을 소중히 여긴다"]},
+            "11-13": {"week1": ["나는 진정한 친구가 될 수 있다","좋은 친구 관계가 나를 성장시킨다","내 친구들은 내 소중한 존재들이다","우정을 통해 내가 더 나아진다","친구를 소중히 대하는 것이 나를 좋은 사람으로 만든다"]}
+          }
+        },
+        {
+          "id": 11,
+          "name": "나는 나를 지킬 수 있어",
+          "color": "#FF69B4",
+          "ageGroups": {
+            "5-7": {"week1": ["내 몸은 내 것이고 소중해","싫으면 \"안 돼\"라고 말할 수 있어","누군가 못하게 하면 어른에게 말해","나는 스스로를 지킬 수 있어","나를 지키는 것은 나쁜 게 아니야"]},
+            "8-10": {"week1": ["내 몸과 마음은 내가 지켜야 할 소중한 것이야","불편하면 작지만 분명하게 말한다","누군가 나를 괴롭히면 어른에게 말한다","내 경계를 지키는 건 중요해","나 자신을 지키는 것은 옳은 일이야"]},
+            "11-13": {"week1": ["내 신체와 정신은 내가 지켜야 할 경계가 있다","불편함을 느끼면 명확하게 거절한다","누군가 나를 해칠 때는 어른에게 반드시 말한다","내 경계를 지키는 것이 나를 지키는 것이다","자신을 지키는 것은 자신감 있는 사람의 행동이다"]}
+          }
+        },
+        {
+          "id": 12,
+          "name": "도움을 청하는 건 강함이야",
+          "color": "#00CED1",
+          "ageGroups": {
+            "5-7": {"week1": ["혼자가 아니야, 어른이 도와줄 거야","도움을 청하는 건 약함이 아니야","내 기분을 말하는 것도 강함이야","누군가 날 괴롭혀도 그건 내 잘못이 아니야","어른들은 나를 지켜줄 거야"]},
+            "8-10": {"week1": ["도움을 청하는 것도 용감한 일이야","혼자 견디려고만 할 필요 없어","내 감정을 표현하는 건 정상이야","누군가가 내를 힘들게 해도 그건 내 잘못이 아니야","어른들은 나를 도와주고 지켜주려고 해"]},
+            "11-13": {"week1": ["도움을 청하는 것도 강함의 표현이다","혼자 견디려는 것이 아니라 함께하는 것을 선택한다","내 감정을 표현하고 공유하는 것이 건강하다","누군가가 나를 괴롭혀도 그것은 절대 나의 책임이 아니다","도움을 구하는 것은 현명한 선택이고 용감한 행동이다"]}
+          }
+        }
+      ]
+    };
+
+    let currentAffirmations = [];
+    let currentTheme = null;
+
+    function initializeThemes() {
+      const themeSelect = document.getElementById('theme');
+      themesData.themes.forEach(theme => {
+        const option = document.createElement('option');
+        option.value = theme.id;
+        option.textContent = theme.name;
+        themeSelect.appendChild(option);
+      });
+    }
+
+    function generateAffirmation() {
+      const childName = document.getElementById('childName').value.trim();
+      const ageGroup = document.getElementById('ageGroup').value;
+      const themeId = parseInt(document.getElementById('theme').value);
+
+      if (!childName) {
+        alert('아이 이름을 입력해주세요.');
+        return;
+      }
+
+      if (!ageGroup || !themeId) {
+        alert('나이대와 테마를 모두 선택해주세요.');
+        return;
+      }
+
+      currentTheme = themesData.themes.find(t => t.id === themeId);
+      currentAffirmations = [...currentTheme.ageGroups[ageGroup].week1];
+
+      renderEditSection();
+      renderAffirmationCard(childName);
+
+      document.getElementById('resultSection').classList.add('show');
+      document.querySelector('.btn-print').classList.add('show');
+    }
+
+    function renderEditSection() {
+      const editSection = document.getElementById('editSection');
+      let html = '<h3>✏️ 확언 수정 (필요시 삭제 또는 추가)</h3>';
+
+      currentAffirmations.forEach((line, index) => {
+        html += `
+          <div class="affirmation-line">
+            <input type="text" value="${line}" onchange="updateAffirmation(${index}, this.value)">
+            <button class="btn-change" onclick="changeAffirmation(${index})">🔄 변경</button>
+            <button class="btn-delete" onclick="deleteAffirmation(${index})">✕ 삭제</button>
+          </div>
+        `;
+      });
+
+      html += '<button class="add-line-btn" onclick="addNewLine()">+ 새 확언 추가</button>';
+      editSection.innerHTML = html;
+    }
+
+    function deleteAffirmation(index) {
+      currentAffirmations.splice(index, 1);
+      renderEditSection();
+      const childName = document.getElementById('childName').value.trim();
+      renderAffirmationCard(childName);
+    }
+
+    function addNewLine() {
+      const randomAffirmation = getRandomAffirmation();
+      currentAffirmations.push(randomAffirmation);
+      renderEditSection();
+      const childName = document.getElementById('childName').value.trim();
+      renderAffirmationCard(childName);
+    }
+
+    function changeAffirmation(index) {
+      const randomAffirmation = getRandomAffirmation();
+      currentAffirmations[index] = randomAffirmation;
+      renderEditSection();
+      const childName = document.getElementById('childName').value.trim();
+      renderAffirmationCard(childName);
+    }
+
+    function updateAffirmation(index, value) {
+      currentAffirmations[index] = value;
+      const childName = document.getElementById('childName').value.trim();
+      renderAffirmationCard(childName);
+    }
+
+    function getRandomAffirmation() {
+      const ageGroup = document.getElementById('ageGroup').value;
+      const allAffirmations = [];
+      
+      // 현재 테마의 모든 주차의 모든 확언 수집
+      for (let week in currentTheme.ageGroups[ageGroup]) {
+        allAffirmations.push(...currentTheme.ageGroups[ageGroup][week]);
+      }
+
+      // 이미 사용 중인 확언 제외
+      const availableAffirmations = allAffirmations.filter(
+        aff => !currentAffirmations.includes(aff)
+      );
+
+      // 사용 가능한 확언이 없으면 전체에서 선택
+      const source = availableAffirmations.length > 0 ? availableAffirmations : allAffirmations;
+      return source[Math.floor(Math.random() * source.length)];
+    }
+
+    function renderAffirmationCard(childName) {
+      const display = document.getElementById('affirmationDisplay');
+      
+      display.innerHTML = `
+        <div class="affirmation-card">
+          <div class="affirmation-title">이번 주 ${childName}의<br>아침 긍정 확언</div>
+          <div class="affirmation-text">
+            ${currentAffirmations.map(line => `<div>• ${line}</div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    window.addEventListener('load', initializeThemes);
+  </script>
+</body>
+</html>
